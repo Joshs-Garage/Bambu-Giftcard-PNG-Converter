@@ -1,8 +1,13 @@
 # 3dPrinter-Image-Converter
-This script is supposed to convert image files to a 3d model (.3mf) with colors only at a **selected height**. Default is a credit card format
+This script is supposed to convert image files to a 3d model (.3mf) with colors only at a **selected height**. Default is a credit card format.
 
 # Demo here:
 ***Link: ***
+
+Output differences: 
+**From the outside the output is the same but**:
+3mf --> slicers dont automatically add the colors you have to do it manually (Process: -> Objects -> select the colors)
+obj --> slicers have the neat color mapping dialog *but* the ignores the color layers you set inside the model (greater print times & waste) 
 
 # Example
 You Take an Image like this:
@@ -10,7 +15,7 @@ You Take an Image like this:
 
 Use the demo link to convert it:
 
-(Default is a 0.2 nozzle [recommended], 8 colors [grayscale works great for less colors] and a credit card format)
+(Default is a 0.2 nozzle [recommended], 8 colors [grayscale works great for fewer colors] and a credit card format)
 <img width="2554" height="1176" alt="image" src="https://github.com/user-attachments/assets/1d238f01-a954-4004-bb72-0b222b561f47" />
 
 Have this printable output:
