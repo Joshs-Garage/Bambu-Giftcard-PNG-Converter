@@ -6,7 +6,9 @@ This script is supposed to convert image files to a 3d model (.3mf) with colors 
 
 Output differences: 
 **From the outside the output is the same but**:
+
 3mf --> slicers dont automatically add the colors you have to do it manually (Process: -> Objects -> select the colors)
+
 obj --> slicers have the neat color mapping dialog *but* the ignores the color layers you set inside the model (greater print times & waste) 
 
 # Example
