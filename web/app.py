@@ -16,6 +16,12 @@ NOZZLE_PRESETS = {
     "0.4 mm nozzle": 0.45,
 }
 PREVIEW_MODES = ("Split View", "Top-Down View", "Angled 3D View")
+EXPORT_FORMATS = ("Grouped Bambu 3MF", "OBJ + MTL", "STL part set")
+EXPORT_FORMAT_LABELS = {
+    "Grouped Bambu 3MF": "3MF",
+    "OBJ + MTL": "OBJ + MTL",
+    "STL part set": "STL",
+}
 
 
 def calculate_grid_resolution(max_x: float, max_y: float, voxel_size: float) -> int:
@@ -136,40 +142,73 @@ st.markdown(
         box-sizing: border-box !important;
       }
       
-      /* --- 2. FLOATING EXPORT CONTAINER --- */
+      /* --- 2. FLOATING EXPORT BAR --- */
       .st-key-floating_export {
         position: fixed !important;
         right: 2rem !important;
         bottom: 2rem !important;
         left: auto !important;
         z-index: 999999 !important;
-        width: 320px !important;
-        max-width: calc(100vw - 4rem) !important;
+        width: 390px !important;
+        max-width: calc(100vw - 2rem) !important;
         background: #1e293b !important;
         border: 1px solid #334155 !important;
         border-radius: 8px !important;
-        padding: 0.6rem !important;
+        padding: 0.5rem !important;
         box-shadow: 0 12px 34px rgba(0, 0, 0, 0.25) !important;
-        overflow: hidden !important; /* Magic bullet: forces all children to stay inside */
+        overflow: visible !important;
       }
       
       /* --- 3. FORCE STREAMLIT'S INVISIBLE CONTAINERS TO BEHAVE --- */
       .st-key-floating_export [data-testid="stVerticalBlock"],
+      .st-key-floating_export [data-testid="stHorizontalBlock"],
       .st-key-floating_export .element-container,
+      .st-key-floating_export [data-testid="stSelectbox"],
       .st-key-floating_export [data-testid="stButton"],
       .st-key-floating_export [data-testid="stDownloadButton"] {
         width: 100% !important;
-        max-width: 100% !important; /* Stops the blowout to the right */
+        max-width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        display: block !important;
       }
       
-      /* Add vertical spacing back safely */
       .st-key-floating_export [data-testid="stVerticalBlock"] {
         display: flex !important;
         flex-direction: column !important;
+        gap: 0 !important;
+      }
+
+      .st-key-floating_export [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        align-items: flex-end !important;
         gap: 0.5rem !important;
+      }
+
+      .st-key-floating_export [data-testid="column"]:first-of-type {
+        flex: 0 0 8.25rem !important;
+        width: 8.25rem !important;
+        min-width: 8.25rem !important;
+      }
+
+      .st-key-floating_export [data-testid="column"]:last-of-type {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
+
+      .st-key-floating_export [data-testid="stSelectbox"] label {
+        display: none !important;
+      }
+
+      .st-key-floating_export [data-baseweb="select"],
+      .st-key-floating_export [data-baseweb="select"] > div {
+        min-height: 2rem !important;
+        height: 2rem !important;
+        border-radius: 6px !important;
+      }
+
+      .st-key-floating_export [data-baseweb="select"] div {
+        font-size: 1rem !important;
+        line-height: 1.1 !important;
       }
       
       .st-key-floating_export div[data-testid="stMarkdownContainer"] p,
@@ -179,8 +218,10 @@ st.markdown(
       }
       
       /* --- 4. DISABLED BUTTON --- */
-      .st-key-floating_export button:disabled,
-      .st-key-floating_export button:disabled * {
+      .st-key-floating_export [data-testid="stButton"] button:disabled,
+      .st-key-floating_export [data-testid="stButton"] button:disabled *,
+      .st-key-floating_export [data-testid="stDownloadButton"] button:disabled,
+      .st-key-floating_export [data-testid="stDownloadButton"] button:disabled * {
         background: #1e293b !important;
         color: #1e293b !important;
         border-color: #1e293b !important;
@@ -191,10 +232,12 @@ st.markdown(
       }
       
       /* --- 5. ENABLED RED BUTTON --- */
-      .st-key-floating_export button:not(:disabled) {
+      .st-key-floating_export [data-testid="stButton"] button:not(:disabled),
+      .st-key-floating_export [data-testid="stDownloadButton"] button:not(:disabled) {
         background: #ef4444 !important;
         border: 1px solid #f87171 !important;
         min-height: 2rem !important;
+        height: 2rem !important;
         width: 100% !important;
         max-width: 100% !important;
         border-radius: 6px !important;
@@ -210,7 +253,8 @@ st.markdown(
       }
       
       /* --- 6. FIX THE TEXT SO IT STAYS IN THE CENTER --- */
-      .st-key-floating_export button:not(:disabled) * {
+      .st-key-floating_export [data-testid="stButton"] button:not(:disabled) *,
+      .st-key-floating_export [data-testid="stDownloadButton"] button:not(:disabled) * {
         color: #1e293b !important; 
         -webkit-text-fill-color: #1e293b !important;
         font-size: 1.0rem !important;
@@ -223,10 +267,26 @@ st.markdown(
         flex: 0 1 auto !important;
       }
       
-      .st-key-floating_export button:not(:disabled):hover,
-      .st-key-floating_export button:not(:disabled):focus {
+      .st-key-floating_export [data-testid="stButton"] button:not(:disabled):hover,
+      .st-key-floating_export [data-testid="stButton"] button:not(:disabled):focus,
+      .st-key-floating_export [data-testid="stDownloadButton"] button:not(:disabled):hover,
+      .st-key-floating_export [data-testid="stDownloadButton"] button:not(:disabled):focus {
         background: #dc2626 !important; 
         border-color: #ef4444 !important;
+      }
+
+      [data-testid="stSelectboxVirtualDropdown"],
+      div[data-baseweb="popover"]:has(ul[role="listbox"]),
+      div[data-baseweb="popover"]:has(ul[role="listbox"]) > div,
+      div[data-baseweb="popover"] ul[role="listbox"] {
+        width: max-content !important;
+        min-width: 8.25rem !important;
+        max-width: calc(100vw - 2rem) !important;
+      }
+
+      [data-testid="stSelectboxVirtualDropdown"] li,
+      div[data-baseweb="popover"] li[role="option"] {
+        white-space: nowrap !important;
       }
       
       .block-container { padding-bottom: 10rem; }
@@ -253,7 +313,7 @@ for key, value in (
     ("frame_color_hex", "#000000"),
     ("color_count", 8),
     ("preview_mode", "Split View"),
-    ("export_format", "OBJ + MTL"),
+    ("export_format", "Grouped Bambu 3MF"),
     ("export_ready", False),
     ("last_export_signature", None),
 ):
@@ -437,11 +497,14 @@ else:
 
 with st.container(key="floating_export"):
     can_export = st.session_state.original_rgba is not None and bool(palette_snapshots) and export_settings is not None
-    st.selectbox(
+    format_col, download_col = st.columns([0.36, 0.64])
+    format_col.selectbox(
         "Export format",
-        ("OBJ + MTL", "Grouped Bambu 3MF", "STL part set"),
+        EXPORT_FORMATS,
         key="export_format",
+        format_func=lambda value: EXPORT_FORMAT_LABELS.get(value, value),
         on_change=mark_export_stale,
+        label_visibility="collapsed",
     )
     download_label = {
         "Grouped Bambu 3MF": "Download 3MF",
@@ -471,7 +534,7 @@ with st.container(key="floating_export"):
                 st.session_state.export_ready = False
 
     if can_export and st.session_state.get("export_ready") and "export_bytes" in st.session_state:
-        st.download_button(
+        download_col.download_button(
             label=download_label,
             data=st.session_state.export_bytes,
             file_name=st.session_state.export_name,
@@ -480,4 +543,4 @@ with st.container(key="floating_export"):
             type="primary",
         )
     else:
-        st.button(download_label, use_container_width=True, disabled=True, type="primary")
+        download_col.button(download_label, use_container_width=True, disabled=True, type="primary")
