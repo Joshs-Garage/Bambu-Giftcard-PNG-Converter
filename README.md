@@ -2,7 +2,7 @@
 This script is supposed to convert image files to a 3d model (.3mf) with colors only at a **selected height**. Default is a credit card format.
 
 # Demo here:
-***Link: ***
+***Link: https://joshs-garage.github.io/3dPrinter-Image-Converter/ ***
 
 Output differences: 
 **From the outside the output is the same but**:
